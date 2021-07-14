@@ -1,6 +1,4 @@
 import React from 'react';
-// eslint-disable-next-line no-restricted-imports
-import {mountWithAppProvider, trigger} from 'test-utilities/legacy';
 import {Button, Image, ThemeProvider} from 'components';
 import {mountWithApp} from 'test-utilities';
 
@@ -15,7 +13,7 @@ describe('<ContextualSaveBar />', () => {
         onAction: jest.fn(),
       };
 
-      const contextualSaveBar = mountWithAppProvider(
+      const contextualSaveBar = mountWithApp(
         <ContextualSaveBar discardAction={discardAction} />,
       );
 
@@ -32,11 +30,11 @@ describe('<ContextualSaveBar />', () => {
           discardConfirmationModal: false,
         };
 
-        const contextualSaveBar = mountWithAppProvider(
+        const contextualSaveBar = mountWithApp(
           <ContextualSaveBar discardAction={discardAction} />,
         );
 
-        contextualSaveBar.find(Button).simulate('click');
+        contextualSaveBar.find(Button)!.trigger('onClick');
         expect(discardAction.onAction).toHaveBeenCalled();
       });
 
@@ -47,12 +45,12 @@ describe('<ContextualSaveBar />', () => {
           discardConfirmationModal: false,
         };
 
-        const contextualSaveBar = mountWithAppProvider(
+        const contextualSaveBar = mountWithApp(
           <ContextualSaveBar discardAction={discardAction} />,
         );
 
-        expect(contextualSaveBar.find(DiscardConfirmationModal)).toHaveLength(
-          0,
+        expect(contextualSaveBar).not.toContainReactComponent(
+          DiscardConfirmationModal,
         );
       });
     });
@@ -65,11 +63,11 @@ describe('<ContextualSaveBar />', () => {
           discardConfirmationModal: true,
         };
 
-        const contextualSaveBar = mountWithAppProvider(
+        const contextualSaveBar = mountWithApp(
           <ContextualSaveBar discardAction={discardAction} />,
         );
 
-        contextualSaveBar.find(Button).simulate('click');
+        contextualSaveBar.find(Button)!.trigger('onClick');
         expect(discardAction.onAction).not.toHaveBeenCalled();
       });
 
@@ -80,11 +78,16 @@ describe('<ContextualSaveBar />', () => {
           discardConfirmationModal: true,
         };
 
-        const discardConfirmationModal = mountWithAppProvider(
+        const discardConfirmationModal = mountWithApp(
           <ContextualSaveBar discardAction={discardAction} />,
-        ).find(DiscardConfirmationModal);
+        );
 
-        expect(discardConfirmationModal.prop('open')).toBe(false);
+        expect(discardConfirmationModal).toContainReactComponent(
+          DiscardConfirmationModal,
+          {
+            open: false,
+          },
+        );
       });
 
       it('sets the DiscardConfirmationModal `open` prop to true when the discard button is clicked', () => {
@@ -94,16 +97,17 @@ describe('<ContextualSaveBar />', () => {
           discardConfirmationModal: true,
         };
 
-        const contextualSaveBar = mountWithAppProvider(
+        const contextualSaveBar = mountWithApp(
           <ContextualSaveBar discardAction={discardAction} />,
         );
 
-        contextualSaveBar.find(Button).simulate('click');
-        const discardConfirmationModal = contextualSaveBar.find(
+        contextualSaveBar.find(Button)!.trigger('onClick');
+        expect(contextualSaveBar).toContainReactComponent(
           DiscardConfirmationModal,
+          {
+            open: true,
+          },
         );
-        expect(discardConfirmationModal).toHaveLength(1);
-        expect(discardConfirmationModal.prop('open')).toBe(true);
       });
 
       it("sets the DiscardConfirmationModal `open` prop to false when it's `onCancel` handler is triggered", () => {
@@ -113,16 +117,25 @@ describe('<ContextualSaveBar />', () => {
           discardConfirmationModal: true,
         };
 
-        const contextualSaveBar = mountWithAppProvider(
+        const contextualSaveBar = mountWithApp(
           <ContextualSaveBar discardAction={discardAction} />,
         );
 
-        const discardConfirmationModal = contextualSaveBar.find(
+        expect(contextualSaveBar).toContainReactComponent(
           DiscardConfirmationModal,
+          {
+            open: true,
+          },
         );
-        trigger(discardConfirmationModal, 'onCancel');
 
-        expect(discardConfirmationModal.prop('open')).toBe(false);
+        contextualSaveBar.find(DiscardConfirmationModal)!.trigger('onCancel');
+
+        expect(contextualSaveBar).toContainReactComponent(
+          DiscardConfirmationModal,
+          {
+            open: false,
+          },
+        );
       });
 
       it("calls the discardAction prop when it's `onDiscard` handler is triggered", () => {
@@ -132,17 +145,12 @@ describe('<ContextualSaveBar />', () => {
           discardConfirmationModal: true,
         };
 
-        const contextualSaveBar = mountWithAppProvider(
+        const contextualSaveBar = mountWithApp(
           <ContextualSaveBar discardAction={discardAction} />,
         );
 
-        contextualSaveBar.find(Button).simulate('click');
-        const discardConfirmationModal = contextualSaveBar.find(
-          DiscardConfirmationModal,
-        );
-
-        trigger(discardConfirmationModal, 'onDiscard');
-
+        contextualSaveBar.find(Button)!.trigger('onClick');
+        contextualSaveBar.find(DiscardConfirmationModal)!.trigger('onDiscard');
         expect(discardAction.onAction).toHaveBeenCalled();
       });
 
@@ -153,16 +161,18 @@ describe('<ContextualSaveBar />', () => {
           discardConfirmationModal: true,
         };
 
-        const contextualSaveBar = mountWithAppProvider(
+        const contextualSaveBar = mountWithApp(
           <ContextualSaveBar discardAction={discardAction} />,
         );
 
-        const discardConfirmationModal = contextualSaveBar.find(
-          DiscardConfirmationModal,
-        );
-        trigger(discardConfirmationModal, 'onDiscard');
+        contextualSaveBar.find(DiscardConfirmationModal)!.trigger('onDiscard');
 
-        expect(discardConfirmationModal.prop('open')).toBe(false);
+        expect(contextualSaveBar).toContainReactComponent(
+          DiscardConfirmationModal,
+          {
+            open: false,
+          },
+        );
       });
     });
   });
@@ -174,13 +184,14 @@ describe('<ContextualSaveBar />', () => {
         onAction: jest.fn(),
       };
 
-      const contextualSaveBar = mountWithAppProvider(
+      const contextualSaveBar = mountWithApp(
         <ContextualSaveBar saveAction={saveAction} />,
       );
 
-      const button = contextualSaveBar.find(Button);
-      expect(button.prop('onClick')).toBe(saveAction.onAction);
-      expect(button.prop('children')).toBe(saveAction.content);
+      expect(contextualSaveBar).toContainReactComponent(Button, {
+        children: saveAction.content,
+        onClick: saveAction.onAction,
+      });
     });
   });
 
@@ -190,12 +201,13 @@ describe('<ContextualSaveBar />', () => {
         onAction: jest.fn(),
       };
 
-      const contextualSaveBar = mountWithAppProvider(
+      const contextualSaveBar = mountWithApp(
         <ContextualSaveBar discardAction={discardAction} />,
       );
 
-      const discardButton = contextualSaveBar.find(Button);
-      expect(discardButton.text()).toBe('Discard');
+      expect(contextualSaveBar).toContainReactComponent(Button, {
+        children: 'Discard',
+      });
     });
 
     it('renders a save action with default text without content being provided', () => {
@@ -203,18 +215,19 @@ describe('<ContextualSaveBar />', () => {
         onAction: jest.fn(),
       };
 
-      const contextualSaveBar = mountWithAppProvider(
+      const contextualSaveBar = mountWithApp(
         <ContextualSaveBar saveAction={saveAction} />,
       );
 
-      const commitButton = contextualSaveBar.find(Button);
-      expect(commitButton.text()).toBe('Save');
+      expect(contextualSaveBar).toContainReactComponent(Button, {
+        children: 'Save',
+      });
     });
   });
 
   describe('logo', () => {
     it('will render an image with the contextual save bar source', () => {
-      const contextualSaveBar = mountWithAppProvider(<ContextualSaveBar />, {
+      const contextualSaveBar = mountWithApp(<ContextualSaveBar />, {
         theme: {
           logo: {
             width: 200,
@@ -222,13 +235,14 @@ describe('<ContextualSaveBar />', () => {
           },
         },
       });
-      expect(contextualSaveBar.find(Image).prop('source')).toBe(
-        './assets/monochrome_shopify.svg',
-      );
+
+      expect(contextualSaveBar).toContainReactComponent(Image, {
+        source: './assets/monochrome_shopify.svg',
+      });
     });
 
     it('will render an image with the width provided', () => {
-      const contextualSaveBar = mountWithAppProvider(<ContextualSaveBar />, {
+      const contextualSaveBar = mountWithApp(<ContextualSaveBar />, {
         theme: {
           logo: {
             width: 200,
@@ -236,14 +250,13 @@ describe('<ContextualSaveBar />', () => {
           },
         },
       });
-      expect(contextualSaveBar.find(Image).get(0).props.style).toHaveProperty(
-        'width',
-        '200px',
-      );
+      expect(contextualSaveBar).toContainReactComponent(Image, {
+        style: {width: '200px'},
+      });
     });
 
     it('will render the image with a default width if 0 is provided', () => {
-      const contextualSaveBar = mountWithAppProvider(<ContextualSaveBar />, {
+      const contextualSaveBar = mountWithApp(<ContextualSaveBar />, {
         theme: {
           logo: {
             contextualSaveBarSource: './assets/monochrome_shopify.svg',
@@ -251,14 +264,14 @@ describe('<ContextualSaveBar />', () => {
           },
         },
       });
-      expect(contextualSaveBar.find(Image).get(0).props.style).toHaveProperty(
-        'width',
-        '104px',
-      );
+
+      expect(contextualSaveBar).toContainReactComponent(Image, {
+        style: {width: '104px'},
+      });
     });
 
     it('will not render the logo when content is aligned flush left', () => {
-      const contextualSaveBar = mountWithAppProvider(
+      const contextualSaveBar = mountWithApp(
         <ContextualSaveBar alignContentFlush />,
         {
           theme: {
@@ -270,7 +283,7 @@ describe('<ContextualSaveBar />', () => {
         },
       );
 
-      expect(contextualSaveBar.find(Image).exists()).toBeFalsy();
+      expect(contextualSaveBar).not.toContainReactComponent(Image);
     });
   });
 
